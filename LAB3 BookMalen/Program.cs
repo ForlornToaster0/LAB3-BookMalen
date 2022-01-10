@@ -3,12 +3,12 @@ using LAB3_BookMalen.Models;
 
 while (true)
 {
-    Console.WriteLine("Butik(S)aldo, Book(H)antering,(Q)uite");
+    Console.WriteLine("Store (B)alace, Book(M)anagement, (C),lear Screen, (Q)uite");
     string subInout1 = Console.ReadLine();
     string mainInput1 = subInout1.ToUpper();
- 
 
-    if (mainInput1 == "S")
+
+    if (mainInput1 == "B")
     {
         Console.WriteLine("(Ad)libris, (Sc)iencefiction bokhandeln, (Ak)ademibokhandeln");
 
@@ -18,17 +18,17 @@ while (true)
         {
             Butik(1);
         }
-       else if (mainInput2 == "SC")
+        else if (mainInput2 == "SC")
         {
             Butik(2);
         }
-       else if (mainInput2 == "AK")
+        else if (mainInput2 == "AK")
         {
             Butik(3);
         }
         Console.ReadKey();
     }
-    else if (mainInput1 == "H")
+    else if (mainInput1 == "M")
     {
         Console.WriteLine("(A)dd, (R)emove");
 
@@ -44,7 +44,7 @@ while (true)
 
             UpdateDB(Bid, BookNum);
         }
-       else if (mainInput2 == "R")
+        else if (mainInput2 == "R")
         {
             int Bid = FindButik();
             int returnNum = FindForRemove(Bid);
@@ -55,6 +55,10 @@ while (true)
     {
         Environment.Exit(0);
     }
+    else if (mainInput1 =="C")
+    {
+        Console.Clear();
+    }
 }
 
 
@@ -64,17 +68,18 @@ static void Butik(int Bid)
     using var context = new BookMalenContext();
     {
 
-        var lager = context.LagerSaldos.Where(a => a.ButikId == Bid).ToList();
-
-        var böcker = context.Böckers.ToList();
-
-        foreach (var butik in lager)
+        var butikId = context.LagerSaldos.Where(a => a.ButikId == Bid).Select(l => l.Isbn13).ToList();//getting the books for the store
+    
+        for (int i = 0; i < butikId.Count; i++)
         {
-            foreach (var titel in böcker)
-            {
-                Console.WriteLine($"Titel: {titel.Titel} Antal: {butik.Antal}");
-            }
+            var Lager = context.LagerSaldos.Where(l => l.Isbn13 == butikId[i]).Select(l => l.Antal).ToList();
+            var böcker = context.Böckers.Where(b => b.Isbn13 == butikId[i]).Select(b=>b.Titel).ToList();
+
+
+            Console.WriteLine($"Titel: {böcker[0]} Antal: {Lager[0]}");
+
         }
+        Console.WriteLine("Press ESC to return to menu");
     }
 }
 static int FindButik()
@@ -97,10 +102,11 @@ static int FindButik()
 
     }
 
-    return Bid;
+    return Bid-1;
 }
 static int FindBook(int Bid)
 {
+    
     int BookNum = 0;
     int j = 0;
     var context = new BookMalenContext();
@@ -160,7 +166,7 @@ static void UpdateDB(int Bid, int BookNum)
             string input3 = Console.ReadLine();
 
 
-            var newBook = new LagerSaldo { Antal = int.Parse(input3), ButikId = Bid, Id = lagerLenght.Count() + 1, Isbn13 = book2[BookNum] };
+            var newBook = new LagerSaldo { Antal = int.Parse(input3), ButikId = Bid+1, Id = lagerLenght.Count() + 1, Isbn13 = book2[BookNum] };
 
 
             context.LagerSaldos.Add(newBook);
